@@ -1,0 +1,23 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change to your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Your private SSH key
+          SERVER_IP: "164.52.203.175"  # Your server IP
+          USERNAME: "root"  # Your server username
+        run: |
+          echo "${SSH_PRIVATE_KEY}" > private_key
+          chmod 600 private_key
+          rsync -avz --delete -e "ssh -i private_key -o StrictHostKeyChecking=no" ./ ${USERNAME}@${SERVER_IP}:/var/www/html/ticket.com/ --exclude .git --exclude private_key
